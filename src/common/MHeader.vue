@@ -28,7 +28,7 @@
                 <router-link to="/user"
                   >个人中心</router-link
                 >
-                <div class="nav-user-wrapper pa" v-if="login">
+                <div class="nav-user-wrapper pa" v-if="this.$store.state.login">
                   <div class="nav-user-list">
                     <ul>
                       <!-- 头像 -->
@@ -37,11 +37,11 @@
                           <span
                             class="avatar"
                             :style="{
-                              backgroundImage: 'url(' + userInfo.file + ')'
+                              backgroundImage: 'url(' + this.$store.state.userInfo.file + ')'
                             }"
                           ></span>
                         </div>
-                        <p class="name">{{ userInfo.username }}</p>
+                        <p class="name">{{ this.$store.state.userInfo.username }}</p>
                       </li>
                       <li>
                         <router-link to="/user/orderList">我的订单</router-link>
@@ -84,21 +84,21 @@
                 </span>
 
                 <!-- 购物车显示 -->
-                <div class="nav-user-wrapper pa active" v-show="showCart">
+                <div class="nav-user-wrapper pa active" v-show="this.$store.state.showCart">
                   <div class="nav-user-list">
                     <div class="full">
                       <div class="nav-cart-items">
                         <ul>
                           <li
                             class="clearfix"
-                            v-for="(goods, index) in cartList"
+                            v-for="(goods, index) in this.$store.state.cartList"
                             :key="index"
                           >
                             <div class="cart-item">
                               <div class="cart-item-inner">
                                 <a>
                                   <div class="item-thumb">
-                                    <img :src="goods.productImageBig" />
+                                    <img v-lazy="goods.productImageBig" />
                                   </div>
                                   <div class="item-desc">
                                     <div class="cart-cell">
@@ -133,7 +133,7 @@
                         <h5>
                           合计：
                           <span class="price-icon">¥</span>
-                          <span class="price-num">{{ totalPrice }}</span>
+                          <span class="price-num">{{ totalPrice.toFixed(2) }}</span>
                         </h5>
                         <h6>
                           <el-button type="danger">去购物车</el-button>
@@ -182,21 +182,19 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from "vuex";
 import { removeStore, getStore, setStore } from "@/utils/storage";
-
+import {mapMutations} from 'vuex'
 export default {
   data() {
     return {
-      productInfo: ""
+      productInfo: "",
     };
   },
   computed: {
-    ...mapState(["login", "userInfo", "cartList", "showCart"]),
     totalNum() {
       return (
-        this.cartList &&
-        this.cartList.reduce((total, item) => {
+        this.$store.state.cartList &&
+      this.$store.state.cartList.reduce((total, item) => {
           total += item.productNum;
           return total;
         }, 0)
@@ -204,33 +202,43 @@ export default {
     },
     totalPrice() {
       return (
-        this.cartList &&
-        this.cartList.reduce((total, item) => {
+       this.$store.state.cartList &&
+        this.$store.state.cartList.reduce((total, item) => {
           total += item.productNum * item.salePrice;
           return total;
         }, 0)
       );
     }
   },
-  async mounted() {
-    if (this.login) {
-      const res = await this.$http.post("/api/cartList", {
-        userId: getStore("id")
-      });
-      if (res.data.success === true) {
-        setStore("buyCart", res.data.cartList.cartList);
-        this.INITBUYCART();
-      }
-    } else {
-      this.INITBUYCART();
+  // async mounted() {
+  //   if (this.login) {
+  //     const res = await this.$http.post("/api/cartList", {
+  //       userId: getStore("id")
+  //     });
+  //     if (res.data.success === true) {
+  //       setStore("buyCart", res.data.cartList.cartList);
+  //       this.INITBUYCART();
+  //     }
+  //   } else {
+  //     this.INITBUYCART();
+  //   }
+  // },
+ async mounted() {
+    if(this.$store.state.login){
+      const res = this.$http.post('/api/cartList',{userId:getStore('id')})
+      res.then(res =>{
+        console.log(res)
+        setStore('buyCart',res.data.cartList.cartList)
+        this.initByCart()
+      })
+    }else{
+      this.initByCart()
     }
   },
   methods: {
-    ...mapMutations(["SHOWCART", "INITBUYCART"]),
+    ...mapMutations(['initByCart']),
     cartShowState(state) {
-      this.SHOWCART({
-        showCart: state
-      });
+      this.$store.state.showCart = state
     },
     logout() {
       removeStore("token");
@@ -275,7 +283,7 @@ header {
     display: flex;
     align-items: center;
     > a {
-      background: url(/static/images/global-logo-red@2x.png) no-repeat 50%;
+      background: url(../../static/images/global-logo-red@2x.png) no-repeat 50%;
       background-size: cover;
       display: block;
       @include wh(50px, 40px);
@@ -388,7 +396,7 @@ header {
         left: 8px;
         top: 0;
         @include wh(20px);
-        background: url(/static/images/account-icon@2x.32d87deb02b3d1c3cc5bcff0c26314ac.png) -155px
+        background: url(../../static/images/account-icon@2x.32d87deb02b3d1c3cc5bcff0c26314ac.png) -155px
           0;
         background-size: 240px 107px;
         transition: none;
@@ -485,7 +493,7 @@ header {
         display: block;
         @include wh(30px, 100%);
         content: " ";
-        background: url(/static/images/account-icon@2x.32d87deb02b3d1c3cc5bcff0c26314ac.png)
+        background: url(../../static/images/account-icon@2x.32d87deb02b3d1c3cc5bcff0c26314ac.png)
           0 -22px;
         background-size: 240px 107px;
         background-position: -150px -22px;

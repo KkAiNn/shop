@@ -5,6 +5,8 @@ import Index from '@/views/Index.vue'
 import Login from '@/views/Login'
 import Thanks from '@/views/Thanks'
 import Goods from '@/views/Goods'
+import goodsDetail from '@/views/goodsDetail'
+import User from '@/views/User'
 
 Vue.use(VueRouter);
 
@@ -26,7 +28,12 @@ const routes = [{
         path: '/goods',
         name: 'goods',
         component: Goods
-      }
+      },
+      {
+        path: '/goodsDetail',
+        name: 'goodsDetail',
+        component: goodsDetail
+      },
     ]
   },
   {
@@ -34,6 +41,15 @@ const routes = [{
     name: 'login',
     component: Login
   },
+  {
+    path: '/user',
+    name : 'user',
+    component : User,
+    meta:{
+      auth : true
+    }
+  }
+  
 
 ];
 

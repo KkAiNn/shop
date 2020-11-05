@@ -4,9 +4,9 @@
       <el-carousel indicator-position="outside" height="480px">
         <el-carousel-item v-for="item in banner" :key="item.id">
           <!-- <h3>{{ item.id }}</h3> -->
-          <img v-if="item.picUrl" :src="item.picUrl" alt="" class="img1" />
-          <img v-if="item.picUrl1" :src="item.picUrl2" alt="" class="img2 a" />
-          <img v-if="item.picUrl2" :src="item.picUrl3" alt="" class="img3 b" />
+          <img v-if="item.picUrl" v-lazy="item.picUrl" alt="" class="img1" />
+          <img v-if="item.picUrl1" v-lazy="item.picUrl2" alt="" class="img2 a" />
+          <img v-if="item.picUrl2" v-lazy="item.picUrl3" alt="" class="img3 b" />
         </el-carousel-item>
       </el-carousel>
     </div>
@@ -21,7 +21,7 @@
             :key="index"
           >
             <el-card :body-style="{ padding: '0px' }">
-              <img class="i" :src="o.picUrl" />
+              <img class="i" v-lazy="o.picUrl" />
               <a href="#" class="cover-link"></a>
             </el-card>
           </el-col>
@@ -41,17 +41,22 @@
       <section class="w mt30 clearfix" v-if="item.type == 3">
         <shelf :title="item.name">
           <div slot="content" class="floors">
-            <div v-for="(o, j) in item.panelContents" :key="j + ''">
-              <div class="imgbanner">
-                <img v-if="o.type == 3 || o.type == 2" :src="o.picUrl" alt="" />
-              </div>
+            <div
+              class="imgbanner"
+              v-for="(o, j) in item.panelContents"
+              :key="j + ''"
+              v-if="o.type == 3 || o.type == 2"
+            >
+              <img v-lazy="o.picUrl" alt="" />
+              <a href="#" class="cover-link"></a>
+
             </div>
-            <div v-for="(o, j) in item.panelContents" :key="j + 's'">
-              <MallGoods
-                :goods="o"
-                v-if="o.type != 3 && o.type != 2"
-              ></MallGoods>
-            </div>
+            <MallGoods
+              v-for="(o, j) in item.panelContents"
+              :key="j + 's'"
+              :goods="o"
+              v-if="o.type != 3 && o.type != 2"
+            ></MallGoods>
           </div>
         </shelf>
       </section>
@@ -79,26 +84,24 @@ export default {
     return {
       banner: [],
       homeList: [],
-      item32 : []
+      item32: [],
     };
   },
   async created() {
     const res = this.$http.get("/api/goods/home");
     res
-      .then(val => {
+      .then((val) => {
         if (val.status == 200) {
           let result = val.data.result;
-          let item = result.find(restype => restype.type == 0);
+          let item = result.find((restype) => restype.type == 0);
           this.homeList = result;
           this.banner = item.panelContents;
-          console.log(this.homeList);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   },
-  
 };
 </script>
 

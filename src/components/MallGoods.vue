@@ -1,33 +1,84 @@
 <template>
-    <el-row class="good-item">
-      <el-col>
-        <el-card :body-style="{padding: 0}">
-          <div class="good-img">
-            <a><img :src="goods.productImageBig" alt=""/></a>
+  <el-row class="good-item">
+    <el-col>
+      <el-card :body-style="{ padding: 0 }">
+        <div class="good-img">
+          <a><img v-lazy="goods.productImageBig" alt="" /></a>
+        </div>
+        <h6 class="good-title">{{ goods.productName }}</h6>
+        <h3 class="sub-title ellipsis">{{ goods.subTitle }}</h3>
+        <div class="good-price pr">
+          <div class="ds pa">
+            <a href="javascript:;">
+              <el-button
+                type="default"
+                size="medium"
+                @click="Detail(goods.productId)"
+                >查看详情</el-button
+              >
+            </a>
+            <a href="javascript:;">
+              <el-button
+                type="primary"
+                size="medium"
+                @click="
+                  addCart(
+                    goods.productId,
+                    goods.salePrice,
+                    goods.productName,
+                    goods.productImageBig
+                  )
+                "
+                >加入购物车</el-button
+              >
+            </a>
           </div>
-          <h6 class="good-title">{{goods.productName}}</h6>
-          <h3 class="sub-title ellipsis">{{goods.subTitle}}</h3>
-          <div class="good-price pr">
-              <div class="ds pa">
-                  <a href="">
-                       <el-button type="default" size="medium"  >查看详情</el-button>
-                  </a>
-                  <a href="">
-                       <el-button type="primary" size="medium"  >加入购物车</el-button>
-                  </a>
-              </div>
-              <p>
-                  <span style="font-size:14px">￥</span>{{Number(goods.salePrice).toFixed(2)}}
-              </p>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+          <p>
+            <span style="font-size: 14px">￥</span
+            >{{ Number(goods.salePrice).toFixed(2) }}
+          </p>
+        </div>
+      </el-card>
+    </el-col>
+  </el-row>
 </template>
 
 <script>
+import { getStore } from "../utils/storage.js";
+import {mapMutations} from 'vuex'
 export default {
-    props : ['goods']
+  props: ["goods"],
+  methods: {
+    ...mapMutations(['ADDCART']),
+    Detail(id) {
+      this.$router.push({
+        path: `goodsDetail?productId=${id}`,
+      });
+    },
+    addCart(id, price, name, img) {
+      console.log(this.$store.state.login);
+      if (this.$store.state.login) {
+        this.$http.post("/api/addCart", {
+          userIds: getStore("id"),
+          productIds: id,
+          productNums: 1,
+        });
+        this.ADDCART({
+          productId: id,
+          productName: name,
+          productImageBig: img,
+          salePrice: price,
+        });
+      } else {
+        this.ADDCART({
+          productId: id,
+          productName: name,
+          productImageBig: img,
+          salePrice: price,
+        });
+      }
+    },
+  },
 };
 </script>
 
